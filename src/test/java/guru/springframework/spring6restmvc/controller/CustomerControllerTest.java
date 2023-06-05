@@ -115,7 +115,7 @@ class CustomerControllerTest {
                 .customerName("Testy McTesty")
                 .build();
 
-        willDoNothing().given(customerService).updateCustomer(c.getId(),c);
+        given(customerService.updateCustomer(c.getId(),c)).willReturn(Optional.of(c));
 
         mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID,c.getId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -133,7 +133,7 @@ class CustomerControllerTest {
                 .customerName("Testy McTesty")
                 .build();
 
-        willDoNothing().given(customerService).deleteCustomer(c.getId());
+        given(customerService.deleteCustomer(c.getId())).willReturn(Boolean.TRUE);
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID,c.getId())
                 .accept(MediaType.APPLICATION_JSON)

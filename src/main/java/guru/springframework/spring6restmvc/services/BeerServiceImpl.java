@@ -3,6 +3,8 @@ package guru.springframework.spring6restmvc.services;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -57,13 +59,13 @@ public class BeerServiceImpl implements BeerService {
         return Optional.of(beerHashMap.get(id));
     }
     @Override
-    public List<BeerDTO> listBeers()
+    public Page<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory, Integer pageNumber, Integer pageSize)
     {
-        return new ArrayList<>(beerHashMap.values());
+        return new PageImpl<>( new ArrayList<>(beerHashMap.values()));
     }
 
     @Override
-    public BeerDTO addBeer(BeerDTO b) {
+    public BeerDTO createBeer(BeerDTO b) {
         BeerDTO newBeerDTO = BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .beerStyle(b.getBeerStyle())
@@ -80,7 +82,7 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public void updateBeer(UUID id, BeerDTO b) {
+    public Optional<BeerDTO> updateBeer(UUID id, BeerDTO b) {
         BeerDTO bToUpdate = beerHashMap.get(id);
 
         bToUpdate.setBeerName(b.getBeerName());
@@ -89,16 +91,19 @@ public class BeerServiceImpl implements BeerService {
         bToUpdate.setQuantityOnHand(b.getQuantityOnHand());
         bToUpdate.setVersion(b.getVersion());
         bToUpdate.setPrice(b.getPrice());
+
+        return Optional.of(bToUpdate);
     }
 
     @Override
-    public void deleteBeer(UUID beerId) {
+    public Boolean deleteBeer(UUID beerId) {
         log.debug("BeerService:: Delete beer id:"+beerId);
         beerHashMap.remove(beerId);
+        return true;
     }
 
     @Override
-    public void patchBeer(UUID id, BeerDTO b) {
+    public Optional<BeerDTO> patchBeer(UUID id, BeerDTO b) {
 
         BeerDTO ub = beerHashMap.get(id);
 
@@ -123,5 +128,7 @@ public class BeerServiceImpl implements BeerService {
         }
 
         ub.setUpdateDate(LocalDateTime.now());
+
+        return Optional.of(ub);
     }
 }

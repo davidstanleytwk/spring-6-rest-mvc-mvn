@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @Primary
@@ -21,26 +23,63 @@ public class CustomerServiceJPA implements CustomerService {
 
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID id) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                customerMapper.customerToCustomerDTO(
+                customerRepository.findById(id).orElse(null)));
     }
 
     @Override
     public List<CustomerDTO> listCustomer() {
-        return null;
+
+
+        return customerRepository
+                .findAll()
+                .stream()
+                .map(customerMapper::customerToCustomerDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public CustomerDTO addCustomer(CustomerDTO c) {
-        return null;
+        return customerMapper
+                .customerToCustomerDTO(
+                        customerRepository
+                                .save(customerMapper.customerDTOToCusomter(c)));
     }
 
     @Override
-    public void updateCustomer(UUID id, CustomerDTO c) {
+    public Optional<CustomerDTO> updateCustomer(UUID id, CustomerDTO c) {
 
+        AtomicReference<Optional<CustomerDTO>> atomicReference= new AtomicReference<>();
+        customerRepository.findById(id).ifPresentOrElse(customer -> {
+
+            customer.setCustomerName(c.getCustomerName());
+            customer.setEmail(c.getEmail());
+
+
+            atomicReference.set(
+                        Optional.of(
+                                customerMapper.customerToCustomerDTO(
+                                        customerRepository.save(customer)
+                                ))
+                    );
+        },
+        ()->{
+            atomicReference.set(Optional.empty());
+        });
+
+        return atomicReference.get();
     }
 
     @Override
-    public void deleteCustomer(UUID cId) {
+    public Boolean deleteCustomer(UUID cId) {
+
+        if( customerRepository.existsById(cId))
+        {
+            customerRepository.deleteById(cId);
+            return true;
+        }
+        return false;
 
     }
 
