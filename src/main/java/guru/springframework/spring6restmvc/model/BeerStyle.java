@@ -5,7 +5,10 @@ public enum BeerStyle {
     ALE,
     LAGER,
     PALE_ALE,
-    CIDER;
+    CIDER,
+    PORTER,
+    SAISON,
+    PILSNER, IPA, WHEAT;
 
 
 
